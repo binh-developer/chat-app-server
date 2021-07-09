@@ -1,6 +1,7 @@
 const { gql } = require("apollo-server");
 const typeDefs = gql`
   type roomMessages {
+    roomId: String
     createdAt: Float
     imageURL: String
     messageText: String
@@ -52,7 +53,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    roomMessages: [roomMessages]
+    messagesInRoom(roomId: String!): [roomMessages]
     roomMetadata: [roomMetadata]
     userMetadata: [userMetadata]
     timeline: [timeline]

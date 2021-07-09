@@ -7,14 +7,20 @@ const resolvers = {
      * Collection room-messages in Firebase
      * @returns
      */
-    roomMessages() {
-      return admin
+    messagesInRoom: async (_, { roomId }) => {
+      const roomMessagesData = await admin
         .database()
         .ref("room-messages")
-        .child("-McIE8aa4OhT21x2JhiP")
+        .child(roomId)
         .once("value")
         .then((snap) => snap.val())
-        .then((val) => Object.keys(val).map((key) => val[key]));
+        .then((val) =>
+          Object.keys(val).map((key) => {
+            return { ...val[key], roomId };
+          })
+        );
+
+      return roomMessagesData;
     },
 
     /**
