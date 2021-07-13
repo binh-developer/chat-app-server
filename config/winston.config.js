@@ -1,12 +1,12 @@
-const appRoot = require('app-root-path');
-const winston = require('winston');
-const {format} = winston;
+const appRoot = require("app-root-path");
+const winston = require("winston");
+const { format } = winston;
 
 // define the custom settings for each transport (file, console)
 const options = {
   file: {
-    level: 'info',
-    filename: `${appRoot}/logs/push-notification-logs.log`,
+    level: "info",
+    filename: `${appRoot}/logs/chat-app-logs.log`,
     handleExceptions: true,
     json: true,
     maxsize: 5242880, // 5MB
@@ -14,7 +14,7 @@ const options = {
     colorize: false,
   },
   console: {
-    level: 'debug',
+    level: "debug",
     handleExceptions: true,
     json: false,
     colorize: true,

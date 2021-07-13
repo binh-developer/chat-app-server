@@ -56,6 +56,11 @@ const typeDefs = gql`
     messagesInRoom(roomId: String!): [roomMessages]
     roomMetadata: [roomMetadata]
     userMetadata: [userMetadata]
+    currentNumber: Int
+  }
+
+  type Subscription {
+    numberIncremented: Int
     timeline: [timeline]
   }
 `;

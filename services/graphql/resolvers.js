@@ -1,5 +1,47 @@
 const { admin } = require("../firebase/setup");
 const _ = require("lodash");
+const pubsub = require("./pubsub");
+
+// Realtime tracking
+admin
+  .database()
+  .ref("timeline")
+  .on("value", (snapshot) => {
+    const timelineResponse = snapshot.val();
+    const keys = Object.keys(timelineResponse);
+    const mapsKeys = keys.map(function (item) {
+      const timelineData = timelineResponse[item];
+
+      if (_.isEmpty(timelineData.likes)) {
+        return {
+          timelineId: item,
+          createdAt: timelineData.createdAt,
+          imageURL: timelineData.imageURL,
+          status: timelineData.status,
+          userId: timelineData.userId,
+          userName: timelineData.userName,
+        };
+      } else {
+        const like = Object.keys(timelineData.likes).map((likeId) => ({
+          likeId: likeId,
+          userId: timelineData.likes[likeId].userId,
+        }));
+
+        return {
+          timelineId: item,
+          createdAt: timelineData.createdAt,
+          imageURL: timelineData.imageURL,
+          status: timelineData.status,
+          userId: timelineData.userId,
+          userName: timelineData.userName,
+          likes: [...like],
+        };
+      }
+    });
+
+    // On value change, it will publish the timeline to subscriptions
+    pubsub.publish("TIMELINE_CHANGED", { timeline: mapsKeys });
+  });
 
 const resolvers = {
   Query: {
@@ -83,49 +125,10 @@ const resolvers = {
 
       return mapsKeys;
     },
-
-    /**
-     * Collection timeline in Firebase
-     */
-    timeline: async () => {
-      const timelineResponse = await admin
-        .database()
-        .ref("timeline")
-        .once("value")
-        .then((snap) => snap.val());
-
-      const keys = Object.keys(timelineResponse);
-      const mapsKeys = keys.map(function (item) {
-        const timelineData = timelineResponse[item];
-
-        if (_.isEmpty(timelineData.likes)) {
-          return {
-            timelineId: item,
-            createdAt: timelineData.createdAt,
-            imageURL: timelineData.imageURL,
-            status: timelineData.status,
-            userId: timelineData.userId,
-            userName: timelineData.userName,
-          };
-        } else {
-          const like = Object.keys(timelineData.likes).map((likeId) => ({
-            likeId: likeId,
-            userId: timelineData.likes[likeId].userId,
-          }));
-
-          return {
-            timelineId: item,
-            createdAt: timelineData.createdAt,
-            imageURL: timelineData.imageURL,
-            status: timelineData.status,
-            userId: timelineData.userId,
-            userName: timelineData.userName,
-            likes: [...like],
-          };
-        }
-      });
-
-      return mapsKeys;
+  },
+  Subscription: {
+    timeline: {
+      subscribe: () => pubsub.asyncIterator(["TIMELINE_CHANGED"]),
     },
   },
 };
