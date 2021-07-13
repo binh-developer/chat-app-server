@@ -239,16 +239,18 @@ function getListTokenDevices() {
       if (userChanged.isSignedIn === false) {
         let token = userChanged.deviceId;
         listRoomIds.forEach((roomKey) => {
-          admin
-            .messaging()
-            .unsubscribeFromTopic(token, roomKey)
-            .then((response) => {
-              winston.info(
-                `${time} Topic: [${roomKey}] Device(s) unsubscribed in Logout: [${token}]` +
-                  "%o",
-                { ...response }
-              );
-            });
+          if (!_.isEmpty(token)) {
+            admin
+              .messaging()
+              .unsubscribeFromTopic(token, roomKey)
+              .then((response) => {
+                winston.info(
+                  `${time} Topic: [${roomKey}] Device(s) unsubscribed in Logout: [${token}]` +
+                    "%o",
+                  { ...response }
+                );
+              });
+          }
         });
 
         admin

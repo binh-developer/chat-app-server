@@ -12,7 +12,7 @@ const typeDefs = require("./services/graphql/typeDefs");
 const resolvers = require("./services/graphql/resolvers");
 
 // import firebase service
-// require("./services/firebase");
+require("./services/firebase");
 
 const app = express();
 // This `app` is the returned value from `express()`.
