@@ -52,10 +52,43 @@ const typeDefs = gql`
     likes: [likeStatus!]
   }
 
+  type reminder {
+    createdAt: Float
+    reminderTime: Float
+    roomId: String
+    roomName: String
+    title: String
+    userId: String
+    reminderId: String
+  }
+
+  type responseResult {
+    status: Boolean
+  }
+
+  type Mutation {
+    createReminder(
+      userId: String
+      title: String
+      roomId: String
+      roomName: String
+      reminderTime: Float
+    ): responseResult
+
+    updateReminder(
+      reminderId: String
+      title: String
+      reminderTime: Float
+    ): responseResult
+
+    removeReminder(reminderId: String): responseResult
+  }
+
   type Query {
     messagesInRoom(roomId: String!): [roomMessages]
     roomMetadata: [roomMetadata]
     userMetadata: [userMetadata]
+    reminder: [reminder]
   }
 
   type Subscription {

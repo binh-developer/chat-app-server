@@ -125,7 +125,89 @@ const resolvers = {
 
       return mapsKeys;
     },
+
+    /**
+     * Collection user-metadata in Firebase
+     * @returns
+     */
+    reminder: async () => {
+      const reminderResponse = await admin
+        .database()
+        .ref("reminder")
+        .once("value")
+        .then((snap) => snap.val());
+
+      // Map data to typeDefs
+      const keys = Object.keys(reminderResponse);
+      const mapsKeys = keys.map(function (item) {
+        const reminderData = reminderResponse[item];
+
+        return {
+          ...reminderData,
+          reminderId: item,
+        };
+      });
+
+      return mapsKeys;
+    },
   },
+
+  Mutation: {
+    createReminder: async (_, data) => {
+      const { userId, title, roomId, roomName, reminderTime } = data;
+      await admin
+        .database()
+        .ref("reminder")
+        .push(
+          {
+            userId,
+            title,
+            roomId,
+            roomName,
+            reminderTime,
+            createdAt: admin.database.ServerValue.TIMESTAMP,
+          },
+          (error) => {
+            if (error) {
+              console.log("Data could not be saved." + error);
+              responseStatus = false;
+            } else {
+              console.log("Data saved successfully.");
+              responseStatus = true;
+            }
+          }
+        );
+
+      return { status: true };
+    },
+
+    updateReminder: (_, data) => {
+      const { reminderId, title, reminderTime } = data;
+      admin.database().ref("reminder").child(reminderId).update({
+        reminderTime,
+        title,
+      }),
+        (error) => {
+          if (error) {
+            console.log("Data could not be updated." + error);
+            responseStatus = false;
+          } else {
+            console.log("Data updated successfully.");
+            responseStatus = true;
+          }
+        };
+
+      return { status: true };
+    },
+
+    removeReminder: async (_, data) => {
+      const { reminderId } = data;
+      await admin.database().ref("reminder").child(reminderId).remove();
+
+      return { status: true };
+    },
+  },
+
   Subscription: {
     timeline: {
       subscribe: () => pubsub.asyncIterator(["TIMELINE_CHANGED"]),
